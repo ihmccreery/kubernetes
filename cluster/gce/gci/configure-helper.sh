@@ -49,11 +49,9 @@ function config-ip-firewall {
     iptables -A FORWARD -w -p ICMP -j ACCEPT
   fi
 
-  iptables -N KUBE-METADATA-SERVER
-  iptables -I FORWARD -p tcp -d 169.254.169.254 --dport 80 -j KUBE-METADATA-SERVER
-
   if [[ "${ENABLE_METADATA_CONCEALMENT:-}" == "true" ]]; then
-    iptables -A KUBE-METADATA-SERVER -j DROP
+    echo "Configuring metadata proxy iptables rule"
+    iptables -t nat -I PREROUTING -p tcp -d 169.254.169.254 --dport 80 -j DNAT --to-destination 127.0.0.1:988
   fi
 }
 
